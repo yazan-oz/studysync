@@ -31,3 +31,41 @@ class LoginForm(FlaskForm):
     password = PasswordField('Password', 
                             validators=[DataRequired()])
     submit = SubmitField('Login')
+
+from wtforms import TextAreaField, DateTimeLocalField, SelectField, BooleanField
+
+class TaskForm(FlaskForm):
+    title = StringField('Task Title', 
+                       validators=[DataRequired(), Length(min=1, max=200)])
+    description = TextAreaField('Description')
+    due_date = DateTimeLocalField('Due Date', format='%Y-%m-%dT%H:%M', validators=[])
+    priority = SelectField('Priority', 
+                          choices=[('low', 'Low'), ('medium', 'Medium'), ('high', 'High')],
+                          default='medium')
+    class_id = SelectField('Class', coerce=int, validators=[])
+    completed = BooleanField('Completed')
+    submit = SubmitField('Save Task')
+
+from wtforms import StringField, TextAreaField, SubmitField, URLField
+
+class ClassForm(FlaskForm):
+    name = StringField('Class Name', 
+                      validators=[DataRequired(), Length(min=1, max=100)])
+    code = StringField('Course Code', 
+                      validators=[Length(max=50)])
+    professor = StringField('Professor', 
+                          validators=[Length(max=100)])
+    room = StringField('Room/Location', 
+                      validators=[Length(max=50)])
+    color = StringField('Color', 
+                       validators=[Length(max=7)],
+                       default='#3498db')
+    notes = TextAreaField('Notes')
+    submit = SubmitField('Save Class')
+
+class ClassLinkForm(FlaskForm):
+    title = StringField('Link Title', 
+                       validators=[DataRequired(), Length(min=1, max=100)])
+    url = URLField('URL', 
+                  validators=[DataRequired(), Length(min=1, max=500)])
+    submit = SubmitField('Add Link')

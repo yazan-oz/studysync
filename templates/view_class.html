@@ -1,0 +1,96 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ class_obj.name }}{% endblock %}
+
+{% block content %}
+    <div class="container mt-4">
+        <div class="card mb-4" style="border-left: 5px solid {{ class_obj.color }};">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h2>{{ class_obj.name }}</h2>
+                        {% if class_obj.code %}
+                            <p class="text-muted">{{ class_obj.code }}</p>
+                        {% endif %}
+                        {% if class_obj.professor %}
+                            <p><strong>Professor:</strong> {{ class_obj.professor }}</p>
+                        {% endif %}
+                        {% if class_obj.room %}
+                            <p><strong>Room:</strong> {{ class_obj.room }}</p>
+                        {% endif %}
+                        {% if class_obj.notes %}
+                            <p class="mt-3"><strong>Notes:</strong><br>{{ class_obj.notes }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="btn-group">
+                        <a href="{{ url_for('edit_class', class_id=class_obj.id) }}" class="btn btn-outline-primary">Edit</a>
+                        <form method="POST" action="{{ url_for('delete_class', class_id=class_obj.id) }}" class="d-inline" onsubmit="return confirm('Are you sure? This will delete the class and all its links.');">
+                            <button type="submit" class="btn btn-outline-danger">Delete</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Important Links Section -->
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">Important Links 🔗</h4>
+                <a href="{{ url_for('add_link', class_id=class_obj.id) }}" class="btn btn-sm btn-primary">+ Add Link</a>
+            </div>
+            <div class="card-body">
+                {% if class_obj.links %}
+                    <div class="list-group">
+                        {% for link in class_obj.links %}
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">{{ link.title }}</h6>
+                                    <a href="{{ link.url }}" target="_blank" class="text-primary small">{{ link.url }}</a>
+                                </div>
+                                <form method="POST" action="{{ url_for('delete_link', link_id=link.id) }}" class="d-inline" onsubmit="return confirm('Delete this link?');">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                                </form>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">No links saved yet. Add your first important link!</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Related Tasks Section -->
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">Related Tasks 📝</h4>
+            </div>
+            <div class="card-body">
+                {% if tasks %}
+                    <div class="list-group">
+                        {% for task in tasks %}
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1 {% if task.completed %}text-decoration-line-through text-muted{% endif %}">
+                                            {{ task.title }}
+                                        </h6>
+                                        {% if task.due_date %}
+                                            <small class="text-muted">Due: {{ task.due_date.strftime('%B %d, %Y') }}</small>
+                                        {% endif %}
+                                    </div>
+                                    <a href="{{ url_for('edit_task', task_id=task.id) }}" class="btn btn-sm btn-outline-primary">View</a>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">No tasks assigned to this class yet.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="mt-3">
+            <a href="{{ url_for('classes') }}" class="btn btn-secondary">← Back to Classes</a>
+        </div>
+    </div>
+{% endblock %}
