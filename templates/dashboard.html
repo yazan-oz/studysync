@@ -9,13 +9,60 @@
             <a href="{{ url_for('new_task') }}" class="btn btn-primary">+ New Task</a>
         </div>
 
+        <!-- Quick Stats Widget -->
+        <div class="row mb-4">
+            <div class="col-md-3 mb-3">
+                <div class="card text-center border-primary">
+                    <div class="card-body">
+                        <h2 class="display-4 text-primary">{{ stats.total_tasks }}</h2>
+                        <p class="text-muted mb-0">Total Tasks</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3 mb-3">
+                <div class="card text-center border-success">
+                    <div class="card-body">
+                        <h2 class="display-4 text-success">{{ stats.completed_tasks }}</h2>
+                        <p class="text-muted mb-0">Completed</p>
+                        <small class="text-success">{{ stats.completion_rate }}% completion rate</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3 mb-3">
+                <div class="card text-center border-warning">
+                    <div class="card-body">
+                        <h2 class="display-4 text-warning">{{ stats.upcoming_count }}</h2>
+                        <p class="text-muted mb-0">Due This Week</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3 mb-3">
+                <div class="card text-center {% if stats.overdue_count > 0 %}border-danger{% else %}border-secondary{% endif %}">
+                    <div class="card-body">
+                        <h2 class="display-4 {% if stats.overdue_count > 0 %}text-danger{% else %}text-secondary{% endif %}">{{ stats.overdue_count }}</h2>
+                        <p class="text-muted mb-0">Overdue</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Weekly Progress -->
+        {% if stats.completed_this_week > 0 %}
+        <div class="alert alert-success mb-4">
+            <strong>🔥 Nice work!</strong> You completed {{ stats.completed_this_week }} task{{ 's' if stats.completed_this_week != 1 else '' }} this week!
+        </div>
+        {% endif %}
+
         {% if tasks %}
             <div class="row">
                 <div class="col-md-12">
                     <h3 class="mb-3">Your Tasks</h3>
                     
                     {% for task in tasks %}
-                        <div class="card mb-3 {% if task.completed %}bg-light{% endif %}">
+                        <div class="card mb-3 {% if task.completed %}opacity-75{% endif %}">
                             <div class="card-body">
                                 <div class="d-flex justify-content-between align-items-start">
                                     <div class="flex-grow-1">
@@ -28,6 +75,9 @@
                                             {% else %}
                                                 <span class="badge bg-success">Low Priority</span>
                                             {% endif %}
+                                            {% if task.class %}
+                                                <span class="badge" style="background-color: {{ task.class.color }};" >{{ task.class.name }}</span>
+                                            {% endif %}
                                         </h5>
                                         
                                         {% if task.description %}
@@ -37,6 +87,9 @@
                                         <div class="text-muted small">
                                             {% if task.due_date %}
                                                 <span>📅 Due: {{ task.due_date.strftime('%B %d, %Y at %I:%M %p') }}</span>
+                                                {% if task.due_date < now and not task.completed %}
+                                                    <span class="badge bg-danger ms-2">OVERDUE</span>
+                                                {% endif %}
                                             {% endif %}
                                             <span class="ms-3">Created: {{ task.created_at.strftime('%B %d, %Y') }}</span>
                                         </div>

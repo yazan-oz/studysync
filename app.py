@@ -3,7 +3,7 @@ from flask_login import login_user, logout_user, login_required, current_user
 from extensions import db, login_manager
 from models import User, Task
 from forms import RegistrationForm, LoginForm, TaskForm
-from datetime import datetime
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key-change-this-later'
@@ -67,9 +67,36 @@ def logout():
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    # Get all tasks for current user, sorted by creation date
+    from datetime import datetime, timedelta
+    
+    # Get all tasks for current user
     tasks = Task.query.filter_by(user_id=current_user.id).order_by(Task.created_at.desc()).all()
-    return render_template('dashboard.html', tasks=tasks)
+    
+    # Calculate stats
+    total_tasks = len(tasks)
+    completed_tasks = len([t for t in tasks if t.completed])
+    
+    # Tasks completed this week
+    week_ago = datetime.utcnow() - timedelta(days=7)
+    completed_this_week = len([t for t in tasks if t.completed and t.created_at >= week_ago])
+    
+    # Upcoming deadlines (next 7 days)
+    upcoming_deadline = datetime.utcnow() + timedelta(days=7)
+    upcoming_tasks = [t for t in tasks if t.due_date and not t.completed and t.due_date <= upcoming_deadline and t.due_date >= datetime.utcnow()]
+    
+    # Overdue tasks
+    overdue_tasks = [t for t in tasks if t.due_date and not t.completed and t.due_date < datetime.utcnow()]
+    
+    stats = {
+        'total_tasks': total_tasks,
+        'completed_tasks': completed_tasks,
+        'completion_rate': round((completed_tasks / total_tasks * 100) if total_tasks > 0 else 0, 1),
+        'completed_this_week': completed_this_week,
+        'upcoming_count': len(upcoming_tasks),
+        'overdue_count': len(overdue_tasks)
+    }
+    
+    return render_template('dashboard.html', tasks=tasks, stats=stats, now=datetime.utcnow())
 
 @app.route('/task/new', methods=['GET', 'POST'])
 @login_required
