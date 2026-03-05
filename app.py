@@ -14,6 +14,7 @@ app = Flask(__name__)
 
 # --- Core config from environment ---
 app.config['SECRET_KEY'] = os.environ['SECRET_KEY']
+app.config['SESSION_COOKIE_SECURE'] = os.environ.get('SESSION_COOKIE_SECURE', 'True') == 'True'
 
 # Build an absolute path for the SQLite file so the app works regardless
 # of the working directory it is launched from.
